@@ -48,7 +48,7 @@ Get-FileHash .\HebEN-Dictation-v1.0.0-Windows-CPU-x64.zip -Algorithm SHA256
 
 Right-click the tray microphone for **Keyboard shortcut…**, **Language** and **Reload settings**. The default shortcut is `Ctrl+Shift+R`. A combination that registers globally can still conflict with a local application shortcut. Windows does not distinguish left/right Ctrl for this hotkey, so `Right Ctrl+?` is not right-hand-only.
 
-On a typical US keyboard, recording the key marked `?` with Ctrl and Shift saves `CTRL+SHIFT+QUESTION`. Recording that same key with Ctrl but without Shift saves `CTRL+QUESTIONKEY` (usually Ctrl+/). These are different shortcuts and can conflict with application Help or comment commands.
+On a typical US keyboard, recording the key marked `?` with Ctrl and Shift saves `CTRL+SHIFT+QUESTION`. The current source on `main` also accepts that key with Ctrl but without Shift as `CTRL+QUESTIONKEY` (usually Ctrl+/); this unshifted fix is **not in the v1.0.0 download**. These shortcuts can conflict with application Help or comment commands.
 
 - **Startup with Windows:** after moving the extracted app to a permanent folder, press `Win+R`, type `shell:startup` and place a shortcut to `HebENDictation.exe` there. The portable app does not do this automatically.
 - **Language:** choose automatic, Hebrew or English. Short Hebrew speech can be misclassified; manually select Hebrew if necessary.
