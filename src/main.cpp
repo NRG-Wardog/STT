@@ -284,7 +284,8 @@ Settings LoadSettings(const fs::path &ini) {
     try {
         s.maxZeroCrossing = std::clamp(std::stof(ReadIni(ini, L"max_zero_crossing", L"0.35")), 0.1f, 1.0f);
     } catch (...) {}
-    s.silenceMs = std::clamp(GetPrivateProfileIntW(L"General", L"silence_ms", 700, ini.c_str()), 250u, 5000u);
+    // Opt-in 200 ms endpoint; leave the public/default setting unchanged.
+    s.silenceMs = std::clamp(GetPrivateProfileIntW(L"General", L"silence_ms", 700, ini.c_str()), 200u, 5000u);
     s.prerollMs = std::clamp(GetPrivateProfileIntW(L"General", L"preroll_ms", 600, ini.c_str()), 100u, 1500u);
     s.maxPhraseSeconds = std::clamp(GetPrivateProfileIntW(L"General", L"max_phrase_seconds", 15, ini.c_str()), 3u, 25u);
     s.unicodeDelayMs = std::clamp(GetPrivateProfileIntW(L"General", L"unicode_delay_ms", 0, ini.c_str()), 0u, 20u);

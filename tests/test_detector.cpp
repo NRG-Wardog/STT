@@ -44,6 +44,22 @@ int main() {
         d.Finish();assert(finals==1);
     }
     {
+        // Explicit 200 ms endpoint: no flush at 180 ms, flush after 200 ms.
+        int emitted=0;
+        heben::Detector d(.013f,200,15,[&](std::vector<float>&& samples){
+            assert(!samples.empty());
+            ++emitted;
+        });
+        auto speech=Tone(400,.1f),quiet180=Tone(180,0.f),quiet20=Tone(20,0.f);
+        d.FeedClassified(speech.data(),speech.size(),true);
+        d.FeedClassified(quiet180.data(),quiet180.size(),false);
+        assert(emitted==0);
+        d.FeedClassified(quiet20.data(),quiet20.size(),false);
+        assert(emitted==1);
+        d.Finish();
+        assert(emitted==1);
+    }
+    {
         using D=heben::InsertionDecision;
         assert(heben::DecideInsertion(false,false,false)==D::CancelFocus);
         assert(heben::DecideInsertion(false,true,true)==D::CancelFocus);
