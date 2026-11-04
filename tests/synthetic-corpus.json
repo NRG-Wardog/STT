@@ -1,0 +1,9 @@
+[
+  {"id":"he-short","language":"he","voice":"he-IL","text":"שלום עולם, זאת בדיקת הכתבה קצרה."},
+  {"id":"he-long","language":"he","voice":"he-IL","text":"מחר בבוקר ניפגש במשרד, נבדוק את תוצאות הבדיקה ונשלח את הדוח לצוות הפיתוח."},
+  {"id":"en-short","language":"en","voice":"en-US","text":"Hello world, this is a short dictation test."},
+  {"id":"en-long","language":"en","voice":"en-US","text":"Tomorrow morning we will review the benchmark results, fix the errors, and send the report to the development team."},
+  {"id":"mixed-he","language":"mixed","voice":"he-IL","text":"פתח את Chrome ושמור את הקובץ בשם report dot txt."},
+  {"id":"mixed-en","language":"mixed","voice":"en-US","text":"Open the file and say shalom before running the Python test."},
+  {"id":"en-numbers","language":"en","voice":"en-US","text":"The version is two point five, the number is forty two, and the file is called report dot text."}
+]

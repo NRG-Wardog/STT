@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Local dictation fixture</title>
+<form id="form"><textarea id="textarea" aria-label="Test textarea"></textarea>
+<div id="editable" contenteditable="true" role="textbox" aria-label="Test contenteditable"></div>
+<button type="submit">Submit</button></form>
+<script>
+window.testEvents=[];window.testSubmissions=0;
+document.getElementById('form').addEventListener('submit', e => {e.preventDefault();window.testSubmissions++;});
+for (const id of ['textarea','editable']) for (const type of ['beforeinput','input','keydown','keyup']) {
+  document.getElementById(id).addEventListener(type,e=>window.testEvents.push({id,type,inputType:e.inputType||null}));
+}
+</script></html>

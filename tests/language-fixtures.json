@@ -1,0 +1,9 @@
+[
+  {"id":"he-greeting","language":"he","voice":"he-IL","text":"שלום"},
+  {"id":"he-two-words","language":"he","voice":"he-IL","text":"שלום עולם"},
+  {"id":"he-command","language":"he","voice":"he-IL","text":"פתח את הקובץ ושמור אותו"},
+  {"id":"en-greeting","language":"en","voice":"en-US","text":"Hello"},
+  {"id":"en-two-words","language":"en","voice":"en-US","text":"Hello world"},
+  {"id":"en-command","language":"en","voice":"en-US","text":"Open the file and save it"},
+  {"id":"mixed-command","language":"mixed","voice":"he-IL","text":"פתח את Chrome ושמור את הקובץ"}
+]
