@@ -213,6 +213,10 @@ std::wstring Trim(const std::wstring &s) {
 }
 
 bool ParseHotkey(const std::wstring &s, UINT &mod, UINT &key) {
+    // Read canonical values saved by the shortcut window, including the
+    // question-mark key, while retaining legacy config syntax below.
+    heben::HotkeySpec parsed;std::wstring error;
+    if(heben::ParseHotkeySyntax(s,parsed,error)){mod=parsed.modifiers;key=parsed.key;return true;}
     UINT m = MOD_NOREPEAT;
     UINT k = 0;
     bool hasMod = false;

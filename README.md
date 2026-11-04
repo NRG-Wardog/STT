@@ -30,7 +30,9 @@ The portable package does not automatically add itself to Windows startup. To st
 
 ### Change the shortcut
 
-Right-click the tray icon → **Keyboard shortcut…**. Type a combination or choose **Record shortcut**, then select **Save**. The app rejects common combinations such as Ctrl+C and checks whether Windows can register the global shortcut. A shortcut can still conflict with an individual application's local shortcuts.
+Right-click the tray icon → **Keyboard shortcut…**. Type a combination or choose **Record shortcut**, then select **Save**. Right Ctrl works as Ctrl in a combination; Windows does not distinguish its left and right sides for this global shortcut, so either side can activate it. The app rejects common combinations such as Ctrl+C and checks whether Windows can register the global shortcut. A shortcut can still conflict with an individual application's local shortcuts.
+
+For **Right Ctrl+?**, enter that text or record the keys that produce `?` on your current keyboard layout. On a typical US layout this is Ctrl+Shift+/. The saved setting may display `CTRL+SHIFT+QUESTION`; it also responds to left Ctrl, and can conflict with an application's Help shortcut.
 
 ### Language and streaming
 

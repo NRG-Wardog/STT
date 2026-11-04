@@ -37,6 +37,8 @@ def main():
     user.GetForegroundWindow.restype=wintypes.HWND;user.GetClipboardSequenceNumber.restype=wintypes.DWORD
     user.GetWindowThreadProcessId.argtypes=[wintypes.HWND,ctypes.POINTER(wintypes.DWORD)]
     user.GetClassNameW.argtypes=[wintypes.HWND,wintypes.LPWSTR,ctypes.c_int]
+    user.GetKeyboardLayout.argtypes=[wintypes.DWORD];user.GetKeyboardLayout.restype=wintypes.HANDLE
+    user.VkKeyScanExW.argtypes=[wintypes.WCHAR,wintypes.HANDLE];user.VkKeyScanExW.restype=ctypes.c_short
     callback=ctypes.WINFUNCTYPE(wintypes.BOOL,wintypes.HWND,wintypes.LPARAM)
     user.EnumDesktopWindows.argtypes=[wintypes.HANDLE,callback,wintypes.LPARAM]
     user.GetDlgItem.argtypes=[wintypes.HWND,ctypes.c_int];user.GetDlgItem.restype=wintypes.HWND
@@ -126,6 +128,50 @@ def main():
                                  'note':'Test-only event feed to recorder; no physical keyboard event sent.'})
         send(dialog,0x0111,103,0)
         result['checks'].append({'case':'valid_saved','pass':not user.IsWindow(dialog) and 'hotkey=CTRL+ALT+SHIFT+F10' in config() and 'keep_sentinel=untouched' in config()})
+        # Exercise the user's Right Ctrl + ? request through the actual
+        # recorder, Windows registration, save, and a process restart. Events
+        # use a test-only feed rather than the physical keyboard.
+        send(hidden,0x0111,2007,0)
+        for _ in range(100):
+            dialog=find('HebENHotkeySettings')
+            if dialog:break
+            time.sleep(.05)
+        if not dialog:raise TimeoutError('Shortcut window did not reopen')
+        edit=user.GetDlgItem(dialog,101);status=user.GetDlgItem(dialog,105)
+        scan=user.VkKeyScanExW('?',user.GetKeyboardLayout(0))
+        if scan==-1:raise RuntimeError('Question mark unavailable on test keyboard layout')
+        question_key=scan&0xff;shift_state=(scan>>8)&0xff
+        modifiers=[0xa3]+([0xa0] if shift_state&1 else [])+([0xa4] if shift_state&4 else [])
+        send(dialog,0x0111,102,0)
+        for key,down in [(k,1) for k in modifiers]+[(question_key,1),(question_key,0)]+[(k,0) for k in reversed(modifiers)]:
+            send(dialog,0x8000+202,key,down)
+        recorded=edit_text()
+        result['checks'].append({'case':'right_ctrl_question_recording_simulated','pass':recorded.startswith('CTRL+') and recorded.endswith('QUESTION'),
+                                 'note':'Test-only event feed; Windows global hotkeys do not distinguish left/right Ctrl.'})
+        send(dialog,0x0111,103,0)
+        result['checks'].append({'case':'question_registered_and_saved','pass':not user.IsWindow(dialog) and ('hotkey='+recorded) in config(), 'message':status_text() if user.IsWindow(dialog) else ''})
+        if user.IsWindow(dialog):raise RuntimeError('Question-mark shortcut was not accepted')
+        user.PostMessageW(hidden,0x0010,0,0)
+        if kernel.WaitForSingleObject(pi.hProcess,10000)!=0:raise TimeoutError('Fixture did not stop for restart test')
+        kernel.CloseHandle(pi.hProcess);pi=PROCESSINFO();hidden=None
+        si=STARTUPINFO();si.cb=ctypes.sizeof(si);si.lpDesktop=name
+        line=ctypes.create_unicode_buffer(subprocess.list2cmdline([str(exe)]))
+        if not kernel.CreateProcessW(str(exe),line,None,None,False,0,None,str(out),ctypes.byref(si),ctypes.byref(pi)):
+            raise OSError(ctypes.get_last_error(),'Fixture restart CreateProcessW')
+        kernel.CloseHandle(pi.hThread);pi.hThread=None
+        for _ in range(100):
+            hidden=find('HebENHotkeyUiTestHiddenClass')
+            if hidden:break
+            time.sleep(.05)
+        if not hidden:raise TimeoutError('Fixture restart window missing')
+        send(hidden,0x0111,2007,0)
+        for _ in range(100):
+            dialog=find('HebENHotkeySettings')
+            if dialog:break
+            time.sleep(.05)
+        if not dialog:raise TimeoutError('Settings missing after restart')
+        edit=user.GetDlgItem(dialog,101);status=user.GetDlgItem(dialog,105)
+        result['checks'].append({'case':'question_persisted_after_restart','pass':edit_text()==recorded and ('hotkey='+recorded) in config()})
         result['status']='PASS_ISOLATED_UI_AND_REGISTRATION' if all(x['pass'] for x in result['checks']) else 'FAIL_ISOLATED_UI'
     except Exception as exc:result['error']=str(exc)
     finally:

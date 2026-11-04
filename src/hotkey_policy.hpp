@@ -1,10 +1,25 @@
 #pragma once
 #include <windows.h>
+#include <algorithm>
 #include <string>
 #include <utility>
 
 namespace heben {
 struct HotkeySpec {UINT modifiers=0;UINT key=0;std::wstring canonical;};
+
+// Resolve '?' on the active keyboard layout, including the modifiers used to
+// type it. Windows global hotkeys still do not distinguish left/right Ctrl.
+inline bool QuestionMarkHotkey(UINT &key,UINT &mods) {
+    SHORT mapped=VkKeyScanExW(L'?',GetKeyboardLayout(0));
+    if(mapped==-1)return false;
+    const unsigned shiftState=(static_cast<unsigned short>(mapped)>>8)&0xff;
+    if(shiftState&~7u)return false;
+    key=static_cast<unsigned char>(mapped&0xff);
+    if(shiftState&1u)mods|=MOD_SHIFT;
+    if(shiftState&2u)mods|=MOD_CONTROL;
+    if(shiftState&4u)mods|=MOD_ALT;
+    return key!=0;
+}
 
 inline std::wstring HotkeyTrim(std::wstring value) {
     auto blank=[](wchar_t c){return c==L' '||c==L'\t'||c==L'\r'||c==L'\n';};
@@ -19,7 +34,9 @@ inline std::wstring FormatHotkey(UINT mods,UINT key) {
     std::wstring text;
     if(mods&MOD_CONTROL)text+=L"CTRL+";if(mods&MOD_ALT)text+=L"ALT+";
     if(mods&MOD_SHIFT)text+=L"SHIFT+";if(mods&MOD_WIN)text+=L"WIN+";
-    if(key==VK_SPACE)text+=L"SPACE";else if(key>=VK_F1&&key<=VK_F12)text+=L"F"+std::to_wstring(key-VK_F1+1);
+    UINT questionKey=0,questionMods=0;
+    if(QuestionMarkHotkey(questionKey,questionMods) && key==questionKey && (mods&questionMods)==questionMods)text+=L"QUESTION";
+    else if(key==VK_SPACE)text+=L"SPACE";else if(key>=VK_F1&&key<=VK_F12)text+=L"F"+std::to_wstring(key-VK_F1+1);
     else if((key>=L'A'&&key<=L'Z')||(key>=L'0'&&key<=L'9'))text.push_back(static_cast<wchar_t>(key));
     else return L"";
     return text;
@@ -31,14 +48,22 @@ inline bool ParseHotkeySyntax(const std::wstring &input,HotkeySpec &out,std::wst
         size_t sep=input.find(L'+',pos);
         auto part=HotkeyUpper(HotkeyTrim(input.substr(pos,sep==std::wstring::npos?sep:sep-pos)));
         if(part.empty()){error=L"Use a format such as Ctrl+Shift+R.";return false;}
-        UINT mod=part==L"CTRL"||part==L"CONTROL"?MOD_CONTROL:part==L"ALT"?MOD_ALT:
-                 part==L"SHIFT"?MOD_SHIFT:part==L"WIN"?MOD_WIN:0;
+        auto modifierName=part;
+        modifierName.erase(std::remove_if(modifierName.begin(),modifierName.end(),[](wchar_t c){return c==L' '||c==L'\t'||c==L'-';}),modifierName.end());
+        // Windows RegisterHotKey does not distinguish left/right modifier
+        // keys. Accept the familiar names and canonicalize them to CTRL.
+        UINT mod=modifierName==L"CTRL"||modifierName==L"CONTROL"||modifierName==L"RCTRL"||modifierName==L"LCTRL"||
+                 modifierName==L"RIGHTCTRL"||modifierName==L"LEFTCTRL"||modifierName==L"RIGHTCONTROL"||modifierName==L"LEFTCONTROL"?MOD_CONTROL:modifierName==L"ALT"?MOD_ALT:
+                 modifierName==L"SHIFT"?MOD_SHIFT:modifierName==L"WIN"?MOD_WIN:0;
         if(mod) {
             if(haveKey || (mods&mod)){error=L"Each modifier must appear once, before the key.";return false;}
             mods|=mod;
         } else {
             if(haveKey){error=L"Choose exactly one main key.";return false;}
-            if(part==L"SPACE")key=VK_SPACE;
+            if(part==L"?"||part==L"QUESTION") {
+                if(!QuestionMarkHotkey(key,mods)){error=L"The question-mark key is unavailable on this keyboard layout.";return false;}
+            }
+            else if(part==L"SPACE")key=VK_SPACE;
             else if(part.size()==1 && ((part[0]>=L'A'&&part[0]<=L'Z')||(part[0]>=L'0'&&part[0]<=L'9')))key=static_cast<UINT>(part[0]);
             else if(part.size()>=2 && part[0]==L'F') {
                 unsigned n=0;for(size_t i=1;i<part.size();++i){if(part[i]<L'0'||part[i]>L'9'){error=L"Unknown key.";return false;}n=n*10+(part[i]-L'0');if(n>12)break;}
@@ -57,7 +82,10 @@ inline bool ValidateUserHotkey(const HotkeySpec &spec,std::wstring &error) {
     UINT mods=spec.modifiers&(MOD_CONTROL|MOD_ALT|MOD_SHIFT|MOD_WIN);
     if(mods&MOD_WIN){error=L"Windows-key shortcuts are reserved for Windows. Choose Ctrl, Alt and/or Shift.";return false;}
     unsigned count=!!(mods&MOD_CONTROL)+!!(mods&MOD_ALT)+!!(mods&MOD_SHIFT);
-    if(count<2){error=L"Use at least two modifiers, such as Ctrl+Shift. Common shortcuts like Ctrl+C are not allowed.";return false;}
+    UINT questionKey=0,questionMods=0;
+    bool questionOnly=mods==MOD_CONTROL && QuestionMarkHotkey(questionKey,questionMods) &&
+        spec.key==questionKey && !(questionKey>=L'A'&&questionKey<=L'Z') && !(questionKey>=L'0'&&questionKey<=L'9');
+    if(count<2 && !questionOnly){error=L"Use at least two modifiers, such as Ctrl+Shift. Common shortcuts like Ctrl+C are not allowed.";return false;}
     if(spec.key==VK_F12){error=L"F12 is reserved by Windows debugging. Choose a different key.";return false;}
     if(mods==(MOD_CONTROL|MOD_SHIFT)) {
         const std::wstring common=L"ACFNOPSTUVWXYZ";
