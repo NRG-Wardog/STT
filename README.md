@@ -160,6 +160,15 @@ The six CTest tests are deterministic native tests. **They do not verify live mi
 
 ## Compatibility, measurements and limitations
 
+### Real-world dictation evaluation (user-verified text; post-release report)
+
+| Language | Supervised editor-output samples | WER | CER |
+|---|---:|---:|---:|
+| Hebrew | 10 | **4.69%** | **2.57%** |
+| English | 9 | **7.25%** | **5.15%** |
+
+These **19 user-reported editor-output measurements** compare dictated results with speaker-approved written text. This is a **single-speaker, small sample**; some source audio was incomplete, and references were not independently verified by listening. The audio and derived segments were deleted after testing, so this evaluation cannot be repeated from those files. No mixed-language examples were completed. The exact executable/model configuration was not supplied with this aggregate. **Do not attribute these metrics to the published v1.0.0 CPU ZIP** or claim general accuracy. The older 20.0% Hebrew FLEURS WER remains mathematically reproducible on its own benchmark; these are different samples and conditions.
+
 The input path has been exercised in controlled/supervised tests with Notepad, Chrome/ChatGPT, VS Code and a Codex terminal using **various trial builds**. That does not establish universal field compatibility.
 
 | Historical diagnostic | Result | Scope |

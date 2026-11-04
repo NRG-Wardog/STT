@@ -39,6 +39,15 @@ WER and CER use normalized edit distance. Punctuation and Hebrew diacritics are 
 
 Replay fixture SHA-256 `ed7e439fed6c4b221e5372dd21f5137f272b6d6a75bd335eab25acf8da016c5f`; CUDA hybrid, 1,000 ms interval, agreement 2 and one trailing word held. The **same** speaker-confirmed mixed recording was replayed five times, not five independent utterances. First committed partial after VAD voice onset: p50 **3,281 ms**, nearest-rank p95 **3,312 ms**. Subsequent-word and final-editor latency: **NOT MEASURED**. This is not a physical-microphone or editor measurement and cannot establish general latency or accuracy.
 
+## Speech profile D: supervised real-world editor output (user report after v1.0.0)
+
+| Language | Editor-output examples | WER | CER |
+|---|---:|---:|---:|
+| Hebrew | 10 | 4.69% | 2.57% |
+| English | 9 | 7.25% | 5.15% |
+
+The owner reported **19 outputs** compared with text approved by one speaker (not independently verified acoustic transcripts). Some recordings did not capture all spoken audio. All recorded and derived audio was deleted following evaluation, so the test cannot be independently reproduced from the original files. No natural mixed-language examples were completed. The aggregate did not include the exact executable hash or model configuration. These are **user-reported observations**, not measurements of the published v1.0.0 CPU package or directly comparable FLEURS results. No private audio or transcripts are published.
+
 ## Reproduce
 
 Build the optional local replay fixture and obtain models using [Development](DEVELOPMENT.md). `tests/replay-hybrid-corpus.py --help`, `tests/run-inference-bench.py --help`, `tests/measure-idle.ps1`, and `tests/sample-process-gpu.ps1` describe the available harnesses. Use the same fixture, model files, input clips, decoding configuration and hardware for paired comparisons. Acquire [FLEURS](https://huggingface.co/datasets/google/fleurs) separately; it is not redistributed here. Never publish personal audio, private transcripts or unreviewed desktop logs.
