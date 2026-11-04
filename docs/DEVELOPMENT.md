@@ -193,6 +193,18 @@ Use a **separate** runtime folder/configuration with `backend=cuda`, appropriate
 
 The optional Hebrew-tuned ivrit.ai workflow is **not in the CPU MVP ZIP**. `tests/fetch-ivrit-whisper.ps1` retrieves a pinned model for research; follow its compatible conversion/quantization steps and validate hashes. For this model, evaluate language routing carefully (especially Hebrew-only vs code-switched input).
 
+## Opt-in 200 ms silence endpoint for local development builds
+
+The public v1.0.0 binary clamps `silence_ms` to **at least 250 ms** even when `config.ini` requests 200. A newer development source revision supports **200 ms when explicitly configured**, while the checked-in default remains **1200 ms**. The existing v1.0.0 release binary is unchanged; recompile the later source to use the new minimum.
+
+In a separate test installation, back up `config.ini` and change only this value:
+
+```ini
+silence_ms=200
+```
+
+Use **Reload settings** from the tray or restart the new development binary, then validate actual microphone-to-editor dictation against your normal setting. In the detector's 20 ms frames, the configured threshold triggers an utterance flush after ten consecutive unvoiced frames. Silero VAD classification can vary near word boundaries, so short mid-sentence pauses may cause premature segmentation, repeated inference or dropped words. Compare 1200, 900, 500 and 200 ms on identical permitted audio, with actual editor WER/CER, premature splits, end-of-speech to final-text p50/p95, CPU and memory. Revert if accuracy or usability degrades. **200 ms of silence is not 200 ms total text latency**; inference and text insertion still take time. Never silently change another user's default or overwrite the currently running installation.
+
 ## Automated and interactive tests
 
 ### Registered deterministic tests (CI-safe)
