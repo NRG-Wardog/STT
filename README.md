@@ -17,7 +17,7 @@
 - **Native Windows app:** C++/Win32, tray microphone icon, configurable global hotkey, and a caret indicator when its position is available.
 - **Optional progressive output:** experimental streaming mode, **off by default**; ordinary dictation inserts text after a phrase/pause.
 
-## Download and install — no compiler needed
+## Download and install (no compiler needed)
 
 1. Download [HebEN-Dictation-v1.0.0-Windows-CPU-x64.zip](https://github.com/NRG-Wardog/STT/releases/download/v1.0.0/HebEN-Dictation-v1.0.0-Windows-CPU-x64.zip) from [Releases](https://github.com/NRG-Wardog/STT/releases/tag/v1.0.0).
 2. Extract the **whole archive** to a writable folder, such as `C:\Apps\HebEN`. Do not run the EXE directly from the ZIP or move it away from `config.ini` and `models\`.
@@ -54,7 +54,7 @@ Right-click the tray microphone for **Keyboard shortcut…**, **Language** and *
 - **Trusted terminals:** `trusted_terminal_input=1` is an explicit opt-in for known, nonsensitive prompts. Password prompts are not always distinguishable in terminals. No automatic Enter is sent.
 - **Clipboard:** Unicode injection is the default. Clipboard fallback is experimental and not recommended because earlier preservation tests failed.
 
-## Build from source — Windows
+## Build from source on Windows
 
 The supported developer environment is **Visual Studio 2022 + CMake on Windows**. The easiest approach is `build.ps1`: configure → compile → run unit tests → download and hash-check models → stage a runnable `dist\` folder.
 

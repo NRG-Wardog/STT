@@ -1,4 +1,4 @@
-# HebEN Dictation v1.0.0 — MVP
+# HebEN Dictation v1.0.0: MVP
 
 The first public MVP provides local Hebrew/English dictation for 64-bit Windows, a tray icon and caret feedback where available, configurable global shortcut (including Ctrl+? on supported keyboard layouts), Unicode text insertion, local Silero voice detection and optional experimental progressive output. The CPU ZIP requires x64 with AVX2, FMA, F16C and BMI2, and includes the multilingual Whisper small Q5_1 model and Silero VAD; it does not require Python or an internet connection for normal operation. Windows does not distinguish left and right Ctrl for global shortcuts, and Ctrl+? can conflict with application shortcuts.
 

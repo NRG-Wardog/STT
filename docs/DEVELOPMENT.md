@@ -228,8 +228,8 @@ Do not commit personal audio, confidential transcripts, browser state or desktop
 
 A reproducible **public CPU archive** is more than the contents of `build-dev\Release`. The repository contains two packaging helpers:
 
-- `tests/package-public-release.ps1` — stages EXE, configuration, checked models, notices, docs/assets, a source commit ID and a per-file SHA-256 manifest.
-- `tests/archive-package.py` — verifies the manifest, archives the staged directory, reads **every file back** from the ZIP and emits an archive-level checksum.
+- `tests/package-public-release.ps1`: stages EXE, configuration, checked models, notices, docs/assets, a source commit ID and a per-file SHA-256 manifest.
+- `tests/archive-package.py`: verifies the manifest, archives the staged directory, reads **every file back** from the ZIP and emits an archive-level checksum.
 
 For a release build made from an intended commit in your local checkout:
 
