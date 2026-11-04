@@ -51,6 +51,7 @@ Right-click the tray microphone for **Keyboard shortcut…**, **Language** and *
 - **Startup with Windows:** after moving the extracted app to a permanent folder, press `Win+R`, type `shell:startup` and place a shortcut to `HebENDictation.exe` there. The portable app does not do this automatically.
 - **Language:** choose automatic, Hebrew or English. Short Hebrew speech can be misclassified; manually select Hebrew if necessary.
 - **Progressive text:** set `streaming_prototype=1` in `config.ini` and choose **Reload settings**. This mode is experimental: already-inserted words are not automatically corrected when later recognition hypotheses change.
+- **Shorter speech-end pause for personal testing:** New builds from `main` allow an explicitly configured `silence_ms=200` in the local `config.ini`; use **Reload settings** afterward. The v1.0.0 CPU binary still enforces a 250 ms minimum, even if configured lower. **200 ms is a VAD silence cutoff, not total transcription latency**, and can split natural pauses. Do not change the shared default; see the [controlled local A/B procedure](docs/DEVELOPMENT.md#opt-in-200-ms-silence-endpoint-for-local-development-builds).
 - **Trusted terminals:** `trusted_terminal_input=1` is an explicit opt-in for known, nonsensitive prompts. Password prompts are not always distinguishable in terminals. No automatic Enter is sent.
 - **Clipboard:** Unicode injection is the default. Clipboard fallback is experimental and not recommended because earlier preservation tests failed.
 
