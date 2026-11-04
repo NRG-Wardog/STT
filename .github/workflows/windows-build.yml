@@ -1,0 +1,35 @@
+name: Windows build and unit tests
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  windows-cpu:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure x64 CPU build
+        run: cmake -S . -B build-ci -A x64 -DGGML_CUDA=OFF
+      - name: Build application and deterministic tests
+        run: >-
+          cmake --build build-ci --config Release --parallel 4 --target
+          HebENDictation HebENDetectorTest HebENUnicodeInputTest
+          HebENClipboardMockTest HebENStablePrefixTest
+          HebENHotkeyPolicyTest HebENHotkeyRegistryTest
+      - name: Run native tests (no microphone or dictation)
+        run: ctest --test-dir build-ci -C Release --output-on-failure
+      - name: Check icon resource and text evaluation fixture
+        shell: pwsh
+        run: |
+          ./tests/check-icon-resource.ps1 -Exe build-ci/Release/HebENDictation.exe
+          python ./tests/test-rootcause-errors.py
+          python ./tests/check-doc-links.py
+      - name: Package and extract a model-free smoke bundle
+        shell: pwsh
+        run: ./tests/ci-package-smoke.ps1 -Exe build-ci/Release/HebENDictation.exe -WorkDirectory build-ci/package-smoke

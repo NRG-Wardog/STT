@@ -1,0 +1,18 @@
+HebEN Dictation v1.0.0 - Windows CPU MVP
+
+Extract all files into a writable folder and run HebENDictation.exe. Allow
+microphone access. Focus a non-sensitive text field, press Ctrl+Shift+R, and
+speak. Press the shortcut again to stop, or wait about five seconds of silence.
+The app stays in the system tray, including the hidden-icons area.
+
+Right-click the tray icon and choose Keyboard shortcut... to change the
+shortcut. Language can be selected from the tray menu. Keep the models folder
+beside the executable. Normal dictation is local and requires no network.
+
+Progressive streaming is experimental and disabled by default. To try it, set
+streaming_prototype=1 in config.ini and use Reload settings in the tray menu.
+Accuracy, mixed-language speech, focus/caret detection and editor compatibility
+vary. Review output. Do not use at password prompts or elevated targets. The
+clipboard fallback has not passed preservation tests and is not recommended.
+
+See README.md and the release notes for requirements, licenses and limitations.
