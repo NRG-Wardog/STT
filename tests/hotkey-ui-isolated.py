@@ -172,14 +172,60 @@ def main():
         if not dialog:raise TimeoutError('Settings missing after restart')
         edit=user.GetDlgItem(dialog,101);status=user.GetDlgItem(dialog,105)
         result['checks'].append({'case':'question_persisted_after_restart','pass':edit_text()==recorded and ('hotkey='+recorded) in config()})
+        if shift_state==1:
+            # The physical key labelled ? may be pressed without Shift. It is
+            # a distinct Ctrl+question-key chord and must not be rejected.
+            send(dialog,0x0111,102,0)
+            for key,down in [(0xa3,1),(question_key,1),(question_key,0),(0xa3,0)]:
+                send(dialog,0x8000+202,key,down)
+            unshifted=edit_text()
+            result['checks'].append({'case':'right_ctrl_question_key_without_shift_simulated',
+                                     'pass':unshifted=='CTRL+QUESTIONKEY','note':'Simulated recorder events, not a physical keyboard.'})
+            send(dialog,0x0111,103,0)
+            result['checks'].append({'case':'unshifted_question_registered_and_saved',
+                                     'pass':unshifted=='CTRL+QUESTIONKEY' and not user.IsWindow(dialog) and ('hotkey='+unshifted) in config(),
+                                     'message':status_text() if user.IsWindow(dialog) else ''})
+            if user.IsWindow(dialog) or unshifted!='CTRL+QUESTIONKEY':raise RuntimeError('Unshifted question-mark key was not accepted')
+            user.PostMessageW(hidden,0x0010,0,0)
+            if kernel.WaitForSingleObject(pi.hProcess,10000)!=0:raise TimeoutError('Fixture did not stop for unshifted restart test')
+            kernel.CloseHandle(pi.hProcess);pi=PROCESSINFO();hidden=None
+            si=STARTUPINFO();si.cb=ctypes.sizeof(si);si.lpDesktop=name
+            line=ctypes.create_unicode_buffer(subprocess.list2cmdline([str(exe)]))
+            if not kernel.CreateProcessW(str(exe),line,None,None,False,0,None,str(out),ctypes.byref(si),ctypes.byref(pi)):
+                raise OSError(ctypes.get_last_error(),'Unshifted fixture restart CreateProcessW')
+            kernel.CloseHandle(pi.hThread);pi.hThread=None
+            for _ in range(100):
+                hidden=find('HebENHotkeyUiTestHiddenClass')
+                if hidden:break
+                time.sleep(.05)
+            if not hidden:raise TimeoutError('Unshifted fixture restart window missing')
+            send(hidden,0x0111,2007,0)
+            for _ in range(100):
+                dialog=find('HebENHotkeySettings')
+                if dialog:break
+                time.sleep(.05)
+            if not dialog:raise TimeoutError('Settings missing after unshifted restart')
+            edit=user.GetDlgItem(dialog,101);status=user.GetDlgItem(dialog,105)
+            result['checks'].append({'case':'unshifted_question_persisted_after_restart','pass':edit_text()==unshifted and ('hotkey='+unshifted) in config()})
         result['status']='PASS_ISOLATED_UI_AND_REGISTRATION' if all(x['pass'] for x in result['checks']) else 'FAIL_ISOLATED_UI'
-    except Exception as exc:result['error']=str(exc)
+    except Exception as exc:result['status']='FAIL_ISOLATED_UI';result['error']=str(exc)
     finally:
         release.set()
         if 'thread' in locals():thread.join(timeout=5)
         if hidden:user.PostMessageW(hidden,0x0010,0,0)
         if pi.hProcess:
-            if kernel.WaitForSingleObject(pi.hProcess,10000)!=0:result['fixture_shutdown']='TIMEOUT_left_running'
+            if kernel.WaitForSingleObject(pi.hProcess,10000)!=0:
+                # A competing fixture may have caused an already-running
+                # message box before its hidden window was created. Close
+                # only a dialog owned by this exact test PID on our desktop.
+                @callback
+                def close_owned_dialog(h,unused):
+                    owner=wintypes.DWORD();user.GetWindowThreadProcessId(h,ctypes.byref(owner));cls=ctypes.create_unicode_buffer(128);user.GetClassNameW(h,cls,128)
+                    if owner.value==pi.dwProcessId and cls.value=='#32770':user.PostMessageW(h,0x0010,0,0)
+                    return True
+                user.EnumDesktopWindows(desktop,close_owned_dialog,0)
+                if kernel.WaitForSingleObject(pi.hProcess,10000)!=0:result['fixture_shutdown']='TIMEOUT_left_running'
+                else:result['fixture_shutdown']='CLOSED_OWNED_STARTUP_DIALOG'
             kernel.CloseHandle(pi.hProcess)
         result['foreground_unchanged']=user.GetForegroundWindow()==before
         result['clipboard_sequence_unchanged']=user.GetClipboardSequenceNumber()==clip

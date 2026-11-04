@@ -78,7 +78,7 @@ private:
     void SetStatus(const wchar_t *text){if(status_)SetWindowTextW(status_,text);}
     void FinishRecording() {
         auto value=recorder_.Recorded();StopRecording();
-        if(value.empty()){SetStatus(L"That key is not supported. Use a letter, number, ?, Space or F1–F12.");return;}
+        if(value.empty()){SetStatus(L"That key is not supported. Use a letter, number, ? key, Space or F1–F12.");return;}
         SetWindowTextW(edit_,value.c_str());SetStatus(L"Shortcut recorded. Select Save to apply it.");
     }
     void SaveValue() {

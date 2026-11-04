@@ -35,7 +35,8 @@ inline std::wstring FormatHotkey(UINT mods,UINT key) {
     if(mods&MOD_CONTROL)text+=L"CTRL+";if(mods&MOD_ALT)text+=L"ALT+";
     if(mods&MOD_SHIFT)text+=L"SHIFT+";if(mods&MOD_WIN)text+=L"WIN+";
     UINT questionKey=0,questionMods=0;
-    if(QuestionMarkHotkey(questionKey,questionMods) && key==questionKey && (mods&questionMods)==questionMods)text+=L"QUESTION";
+    if(QuestionMarkHotkey(questionKey,questionMods) && key==questionKey)
+        text+=(mods&questionMods)==questionMods?L"QUESTION":L"QUESTIONKEY";
     else if(key==VK_SPACE)text+=L"SPACE";else if(key>=VK_F1&&key<=VK_F12)text+=L"F"+std::to_wstring(key-VK_F1+1);
     else if((key>=L'A'&&key<=L'Z')||(key>=L'0'&&key<=L'9'))text.push_back(static_cast<wchar_t>(key));
     else return L"";
@@ -62,6 +63,10 @@ inline bool ParseHotkeySyntax(const std::wstring &input,HotkeySpec &out,std::wst
             if(haveKey){error=L"Choose exactly one main key.";return false;}
             if(part==L"?"||part==L"QUESTION") {
                 if(!QuestionMarkHotkey(key,mods)){error=L"The question-mark key is unavailable on this keyboard layout.";return false;}
+            }
+            else if(part==L"QUESTIONKEY"||part==L"/"||part==L"SLASH") {
+                UINT unusedMods=0;
+                if(!QuestionMarkHotkey(key,unusedMods)){error=L"The question-mark key is unavailable on this keyboard layout.";return false;}
             }
             else if(part==L"SPACE")key=VK_SPACE;
             else if(part.size()==1 && ((part[0]>=L'A'&&part[0]<=L'Z')||(part[0]>=L'0'&&part[0]<=L'9')))key=static_cast<UINT>(part[0]);

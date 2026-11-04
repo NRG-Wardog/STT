@@ -34,6 +34,13 @@ int main(){
            recorder.Feed(questionKey,true)!=R::Waiting||recorder.Feed(questionKey,false)!=R::Waiting||
            recorder.Feed(VK_LSHIFT,false)!=R::Waiting||recorder.Feed(VK_RCONTROL,false)!=R::Complete||
            recorder.Recorded()!=L"CTRL+SHIFT+QUESTION")return 12;
+        recorder.Reset();
+        if(recorder.Feed(VK_RCONTROL,true)!=R::Waiting||recorder.Feed(questionKey,true)!=R::Waiting||
+           recorder.Feed(questionKey,false)!=R::Waiting||recorder.Feed(VK_RCONTROL,false)!=R::Complete||
+           recorder.Recorded()!=L"CTRL+QUESTIONKEY")return 13;
+        if(!heben::ParseHotkeySyntax(recorder.Recorded(),v,e)||!heben::ValidateUserHotkey(v,e)||
+           v.key!=questionKey||(v.modifiers&MOD_SHIFT))return 14;
+        if(!valid(L"Right Ctrl+/"))return 15;
     }
     std::puts("PASS_HOTKEY_POLICY: syntax, normalization and common-shortcut rejection");
 }
